@@ -4,7 +4,7 @@
  */
 import { store, getContext } from '@wordpress/interactivity';
 
-store('frsPortal', {
+store('lrh-portal', {
     actions: {
         navigateToSubPage: (event) => {
             const context = getContext();

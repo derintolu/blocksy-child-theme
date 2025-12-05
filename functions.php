@@ -539,6 +539,39 @@ add_action('template_redirect', function() {
     if (file_exists($manifest_path)) {
         $manifest = json_decode(file_get_contents($manifest_path), true);
 
+        // Enqueue main sidebar component (with CSS)
+        if (isset($manifest['src/main.tsx'])) {
+            $main_file = $manifest['src/main.tsx']['file'];
+            $main_css = $manifest['src/main.tsx']['css'] ?? [];
+
+            // Enqueue CSS
+            foreach ($main_css as $css) {
+                wp_enqueue_style(
+                    'frs-sidebar-css',
+                    get_stylesheet_directory_uri() . '/assets/sidebar/' . $css,
+                    [],
+                    BLOCKSY_CHILD_FRS_VERSION
+                );
+            }
+
+            // Enqueue main sidebar JS as module
+            wp_enqueue_script(
+                'frs-sidebar',
+                get_stylesheet_directory_uri() . '/assets/sidebar/' . $main_file,
+                [],
+                BLOCKSY_CHILD_FRS_VERSION,
+                true
+            );
+            // Add module type attribute
+            add_filter('script_loader_tag', function($tag, $handle) {
+                if ($handle === 'frs-sidebar') {
+                    return str_replace(' src', ' type="module" src', $tag);
+                }
+                return $tag;
+            }, 10, 2);
+        }
+
+        // Also enqueue components export
         if (isset($manifest['src/components-export.tsx'])) {
             $component_file = $manifest['src/components-export.tsx']['file'];
             $component_css = $manifest['src/components-export.tsx']['css'] ?? [];
@@ -554,7 +587,6 @@ add_action('template_redirect', function() {
             }
 
             // Enqueue JS as module
-            // The manifest file is already in /assets/sidebar/, so component_file path is relative to that
             wp_enqueue_script(
                 'frs-components',
                 get_stylesheet_directory_uri() . '/assets/sidebar/' . $component_file,

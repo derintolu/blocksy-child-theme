@@ -4,6 +4,7 @@ vendor/
 
 # Build outputs
 assets/sidebar/
+production/
 
 # OS files
 .DS_Store
